@@ -41,16 +41,38 @@ export async function signUp(req,res) {
     }
 }
 export async function logIn(req,res) {
+    const {email,password} = req.body
+    if(!email || !password) {
+        return res.status(400).json({success:false,message:"provide all fields"})
+    }
     try {
+        const currUser = await User.findOne({email})
+        if(!currUser) {
+            return res.status(400).json({success:false,message:"invalid credentials"})
+        }
+        const correctPassword = await bcrypt.compare(password,currUser.password)
 
+        if(!correctPassword) {
+            return res.status(400).json({success:false,message:"invalid credentials"})
+        }
+
+        generateToken(currUser._id,res)
+        res.status(200).json({
+            _id: currUser._id,
+            fullname:currUser.fullname,
+            email: currUser.email,
+            profilePic: currUser.profilePic,
+            message: "login successfull"
+        })
     } catch (error) {
-
+        res.status(500).json({success:false,message:"internal server error"})
     }
 }
 export async function logOut(req,res) {
     try {
-
+        res.cookie("jwt","",{maxAge:0})
+        res.status(200).json({success:true,message:"Logged out successfully"})
     } catch (error) {
-
+        res.status(500).json({success:false,message:"internal server error"})
     }
 }
