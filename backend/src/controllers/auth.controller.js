@@ -76,3 +76,7 @@ export async function logOut(req,res) {
         res.status(500).json({success:false,message:"internal server error"})
     }
 }
+
+export async function updateProfile(req,res) {
+        
+}
